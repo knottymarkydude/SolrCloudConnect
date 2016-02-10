@@ -1,6 +1,7 @@
 
-package org.sanger.search.solr;
+package org.search.solr.connect;
 
+import org.search.solr.connect.SolrConnect;
 import java.io.IOException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -38,10 +39,10 @@ public class SolrConnectTest {
      */
     @Test
     public void testPingServer() throws Exception {
-        System.out.println("pingServer");
+        logger.info("pingServer");
         solrConnect = new SolrConnect();
-        int expResult = 0;
-        int result = solrConnect.pingServer().getStatus();
+        boolean expResult = true;
+        boolean result = solrConnect.pingServer();
         assertEquals(expResult, result);
     }
 
@@ -50,7 +51,7 @@ public class SolrConnectTest {
      */
     @Test
     public void testAddDoc() throws Exception {
-        UpdateResponse response = null;
+        boolean response = false;
         
         try {
             logger.info("testAddDoc");
@@ -60,14 +61,14 @@ public class SolrConnectTest {
             solrDoc.addField("description", "test description");
             solrDoc.addField("ordered_by", "mpw");
             
-            response = solrConnect.addDoc(solrDoc);
+            response = solrConnect.add(solrDoc, 1000);
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception: " + ex);
         }
         
         logger.info("Response: "+response);
         
-        assertEquals(response.getStatus(), 0);
+        assertTrue(response);
     }
     
 }
