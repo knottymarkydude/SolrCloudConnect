@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.joda.time.LocalTime;
-import org.search.solr.connect.SolrConnect;
+import org.search.solr.connect.SolrCloudConnect;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -29,7 +29,7 @@ public class SolrRun {
             
             System.out.println("The current local time is: " + currentTime);
             
-            SolrConnect solr = new SolrConnect();
+            SolrCloudConnect solr = new SolrCloudConnect();
             
             SolrPingResponse ping = solr.pingServerDetails();
             
