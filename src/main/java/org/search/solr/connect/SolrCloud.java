@@ -16,6 +16,8 @@ import org.apache.solr.common.params.SolrParams;
 
 /**
  *
+ * Connect to Solr Server.
+ * 
  * @author mw8
  */
 public interface SolrCloud {
@@ -40,12 +42,10 @@ public interface SolrCloud {
     public boolean deleteByQuery(String collection, String query) throws SolrServerException, IOException;
     public SolrDocumentList getById(Collection<String> ids, SolrParams params) throws SolrServerException, IOException;
     public SolrDocumentList getById(Collection<String> ids) throws SolrServerException, IOException;
-    public SolrDocument getById(String id) throws SolrServerException, IOException;
     public SolrDocumentList getById(String collection, Collection<String> ids, SolrParams params) throws SolrServerException, IOException;
     public SolrDocumentList getById(String collection, Collection<String> ids) throws SolrServerException, IOException;
+    public SolrDocument getById(String id) throws SolrServerException, IOException;
     public SolrDocument getById(String collection, String id) throws SolrServerException, IOException;
     public QueryResponse query(SolrParams params) throws SolrServerException, IOException;
     public QueryResponse query(String collection, SolrParams params) throws SolrServerException, IOException;
-    public boolean rollback(String collection) throws SolrServerException, IOException;
-    public boolean rollback() throws SolrServerException, IOException;
 }

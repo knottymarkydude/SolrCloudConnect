@@ -10,7 +10,7 @@ import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +25,14 @@ public class SolrCloudConnectTest {
 
     org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final String WT = "json";
+    private static final String QT = "/tika2";
+    private static final String JSONNL = "map";
+    private static final String FACETMINCOUNT = "1";
+    private static final String QUERY = "zibzob";
+    private static final String STARTDOC = "0";
+    private static final String ROWS = "10";
+
     String collection;
     SolrCloudConnect solrConnect;
     SolrInputDocument solrDoc;
@@ -32,6 +40,11 @@ public class SolrCloudConnectTest {
     Collection<SolrInputDocument> solrInputDocuments;
     List<String> ids;
     int commitWithinMs;
+    String id1;
+    String id2;
+    String query;
+    ModifiableSolrParams solrParams;
+    SolrDocumentList solrDocList;
 
     public SolrCloudConnectTest() {
         solrConnect = new SolrCloudConnect();
@@ -41,28 +54,41 @@ public class SolrCloudConnectTest {
 
     @Before
     public void setUp() {
-        
+
         collection = "spar";
-        
+
         solrDoc = new SolrInputDocument();
         solrDoc.addField("id", "12345678");
         solrDoc.addField("title", "test zibzob");
         solrDoc.addField("description", "test description");
         solrDoc.addField("ordered_by", "mpw");
-        
+
         solrDoc1 = new SolrInputDocument();
         solrDoc1.addField("id", "12345679");
-        solrDoc1.addField("title", "test zibzob1");
+        solrDoc1.addField("title", "test zibzob 1");
         solrDoc1.addField("description", "test1 description");
         solrDoc1.addField("ordered_by", "mpw");
 
         commitWithinMs = 10;
-        
+
         solrInputDocuments.add(solrDoc);
         solrInputDocuments.add(solrDoc1);
-        
-        ids.add("12345678");
-        ids.add("12345679");
+
+        id1 = "12345678";
+        id2 = "12345679";
+        query = "zibzob";
+
+        ids.add(id1);
+        ids.add(id2);
+
+        solrParams = new ModifiableSolrParams();
+        solrParams.set("q", QUERY);
+        solrParams.set("rows", ROWS);
+        solrParams.set("wt", WT);
+        solrParams.set("start", STARTDOC);
+        solrParams.set("qt", QT);
+        solrParams.set("json.nl", JSONNL);
+
     }
 
     @After
@@ -75,28 +101,47 @@ public class SolrCloudConnectTest {
     @Test
     public void testPingServer() throws Exception {
         logger.info("pingServer");
-
         boolean expResult = true;
         boolean result = solrConnect.pingServer();
         assertEquals(expResult, result);
     }
 
-     /**
+    /**
      * Test of pingServerDetails method, of class SolrCloudConnect.
      */
     @Test
     public void testPingServerDetails() throws Exception {
-        System.out.println("pingServerDetails");
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrPingResponse expResult = null;
-        SolrPingResponse result = instance.pingServerDetails();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        logger.info("testPingServerDetails");
+        SolrPingResponse solrPingResponse = new SolrPingResponse();
+
+        try {
+            solrPingResponse = solrConnect.pingServerDetails();
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + solrPingResponse);
+        assertNotNull(solrPingResponse.getQTime());
     }
-    
+
     /**
-     * Test of add method with commitWithin, of class SolrCloudConnect.
+     * Test add method, of class SolrCloudConnect.
+     */
+    @Test
+    public void testAdd() throws Exception {
+        logger.info("testAdd");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
+    }
+
+    /**
+     * Test add method with commitWithin, of class SolrCloudConnect.
      */
     @Test
     public void testAddWithTimeOut() throws Exception {
@@ -151,14 +196,14 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testAdd_3args() throws Exception {
-      logger.info("testAdd_3args");
+        logger.info("testAdd_3args");
         boolean response = false;
 
         try {
             response = solrConnect.add(collection, solrInputDocuments, commitWithinMs);
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception: " + ex);
-        }  
+        }
         logger.info("Response: " + response);
         assertTrue(response);
     }
@@ -175,7 +220,7 @@ public class SolrCloudConnectTest {
             response = solrConnect.add(collection, solrInputDocuments);
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception: " + ex);
-        }  
+        }
         logger.info("Response: " + response);
         assertTrue(response);
     }
@@ -192,7 +237,7 @@ public class SolrCloudConnectTest {
             response = solrConnect.commit();
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception: " + ex);
-        } 
+        }
         logger.info("Response: " + response);
         assertTrue(response);
     }
@@ -206,10 +251,12 @@ public class SolrCloudConnectTest {
         boolean response = false;
 
         try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
             response = solrConnect.deleteById(ids);
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception: " + ex);
-        } 
+        }
         logger.info("Response: " + response);
         assertTrue(response);
     }
@@ -219,15 +266,18 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testDeleteById_List_int() throws Exception {
-        System.out.println("deleteById");
-        List<String> ids = null;
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(ids, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
+        logger.info("testDeleteById_List_int");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(id1, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
@@ -235,14 +285,17 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testDeleteById_String() throws Exception {
-        System.out.println("deleteById");
-        String id = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        logger.info("testDeleteById_String");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(id1);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
@@ -250,15 +303,18 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testDeleteById_String_int() throws Exception {
-        System.out.println("deleteById");
-        String id = "";
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(id, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+
+        logger.info("testDeleteById_String_int");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(id1, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
@@ -266,129 +322,248 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testDeleteById_3args_1() throws Exception {
-        System.out.println("deleteById");
-        String collection = "";
-        List<String> ids = null;
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(collection, ids, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        logger.info("testDeleteById_3args_1");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(collection, id1, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteById method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteById_String_String() throws Exception {
-        System.out.println("deleteById");
-        String collection = "";
-        String id = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(collection, id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteById_Collection_Id() throws Exception {
+        logger.info("testDeleteById_Collection_Id");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(collection, id1);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteById method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteById_3args_2() throws Exception {
-        System.out.println("deleteById");
-        String collection = "";
-        String id = "";
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteById(collection, id, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteById_Collection_Id_CommitWithin() throws Exception {
+        logger.info("testDeleteById_Collection_Id_CommitWithin");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.deleteById(collection, id1, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteByQuery method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteByQuery_String_int() throws Exception {
-        System.out.println("deleteByQuery");
-        String query = "";
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteByQuery(query, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteByQuery_commitWithinMs() throws Exception {
+
+        logger.info("testDeleteByQuery_commitWithinMs");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            response = solrConnect.deleteByQuery(query, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteByQuery method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteByQuery_String() throws Exception {
-        System.out.println("deleteByQuery");
-        String query = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteByQuery(query);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteByQuery() throws Exception {
+        logger.info("testDeleteByQuery");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            response = solrConnect.deleteByQuery(query);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteByQuery method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteByQuery_3args() throws Exception {
-        System.out.println("deleteByQuery");
-        String collection = "";
-        String query = "";
-        int commitWithinMs = 0;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteByQuery(collection, query, commitWithinMs);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteByQuery_Collection_commitWithinMs() throws Exception {
+        logger.info("testDeleteByQuery_Collection_commitWithinMs");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            response = solrConnect.deleteByQuery(collection, query, commitWithinMs);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
     }
 
     /**
      * Test of deleteByQuery method, of class SolrCloudConnect.
      */
     @Test
-    public void testDeleteByQuery_String_String() throws Exception {
-        System.out.println("deleteByQuery");
-        String collection = "";
-        String query = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.deleteByQuery(collection, query);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testDeleteByQuery_Collection() throws Exception {
+        logger.info("testDeleteByQuery_Collection");
+        boolean response = false;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            response = solrConnect.deleteByQuery(collection, query);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertTrue(response);
+    }
+
+    /**
+     * Test of getById method, of class SolrCloudConnect.
+     */
+    /**
+     * @Test public void testGetById_Collection_SolrParams() throws Exception {
+     *
+     * ModifiableSolrParams solrParamsLocal = new ModifiableSolrParams();
+     * solrParamsLocal.set("rows", ROWS); solrParamsLocal.set("qt", QT);
+     *
+     * logger.info("testGetById_Collection_SolrParams"); boolean response =
+     * false; SolrDocumentList result = null; boolean remove =
+     * solrParams.remove("q", QUERY);
+     *
+     * try { response = solrConnect.add(solrDoc, commitWithinMs); response =
+     * solrConnect.add(solrDoc1, commitWithinMs); result =
+     * solrConnect.getById(ids, solrParamsLocal);
+     *
+     * result.stream().forEach((SolrDocument solrDoc) -> { logger.info("SolrDoc:
+     * "+ solrDoc.toString()); });
+     *
+     * } catch (SolrServerException | IOException ex) { logger.error("Exception:
+     * " + ex); } logger.info("testGetById_Collection_SolrParams results: " +
+     * result); assertNotNull(result);
+     *
+     * }
+     *
+     */
+    /**
+     * Test of getById method, of class SolrCloudConnect.
+     */
+    @Test
+    public void testGetByIds() throws Exception {
+        logger.info("testGetByIds");
+        boolean response = false;
+        SolrDocumentList results = null;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            results = solrConnect.getById(ids);
+
+            results.stream().forEach((solrDoc) -> {
+                logger.info(solrDoc.toString());
+            });
+
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertEquals(results.size(), 2);
     }
 
     /**
      * Test of getById method, of class SolrCloudConnect.
      */
     @Test
-    public void testGetById_Collection_SolrParams() throws Exception {
-        System.out.println("getById");
-        Collection<String> ids = null;
-        SolrParams params = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocumentList expResult = null;
-        SolrDocumentList result = instance.getById(ids, params);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    public void testGetById() throws Exception {
+        logger.info("testGetById");
+        boolean response = false;
+        SolrDocument solrOutputDoc = null;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            solrOutputDoc = solrConnect.getById(id1);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertEquals(solrOutputDoc.getFieldValue("ordered_by"), "mpw");
+    }
+
+    /**
+     * Test of getById method, of class SolrCloudConnect.
+     */
+    /**
+     * @Test public void testGetById_Collection_ids_params() throws Exception {
+     * logger.info("testGetById_Collection_ids_params"); boolean response =
+     * false; SolrDocumentList results = null; boolean remove =
+     * solrParams.remove("q", QUERY);
+     *
+     * try { response = solrConnect.add(solrDoc, commitWithinMs); response =
+     * solrConnect.add(solrDoc1, commitWithinMs); results =
+     * solrConnect.getById(collection, ids, solrParams);
+     *
+     * results.stream().forEach((solrDoc) -> { logger.info(solrDoc.toString());
+     * });
+     *
+     * } catch (SolrServerException | IOException ex) { logger.error("Exception:
+     * " + ex); } logger.info("Response: " + response);
+     * assertEquals(results.size(), 2); }
+*
+     */
+    /**
+     * Test of getById method, of class SolrCloudConnect.
+     */
+    @Test
+    public void testGetById_Collection_ids() throws Exception {
+        logger.info("testGetById_Collection_ids");
+        boolean response = false;
+        SolrDocumentList results = null;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            results = solrConnect.getById(collection, ids);
+
+            results.stream().forEach((solrDoc) -> {
+                logger.info(solrDoc.toString());
+            });
+
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertEquals(results.size(), 2);
     }
 
     /**
@@ -396,78 +571,19 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testGetById_Collection() throws Exception {
-        System.out.println("getById");
-        Collection<String> ids = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocumentList expResult = null;
-        SolrDocumentList result = instance.getById(ids);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+        logger.info("testGetById_Collection");
+        boolean response = false;
+        SolrDocument solrOutputDoc = null;
 
-    /**
-     * Test of getById method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testGetById_String() throws Exception {
-        System.out.println("getById");
-        String id = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocument expResult = null;
-        SolrDocument result = instance.getById(id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getById method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testGetById_3args() throws Exception {
-        System.out.println("getById");
-        String collection = "";
-        Collection<String> ids = null;
-        SolrParams params = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocumentList expResult = null;
-        SolrDocumentList result = instance.getById(collection, ids, params);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getById method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testGetById_String_Collection() throws Exception {
-        System.out.println("getById");
-        String collection = "";
-        Collection<String> ids = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocumentList expResult = null;
-        SolrDocumentList result = instance.getById(collection, ids);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getById method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testGetById_String_String() throws Exception {
-        System.out.println("getById");
-        String collection = "";
-        String id = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        SolrDocument expResult = null;
-        SolrDocument result = instance.getById(collection, id);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            solrOutputDoc = solrConnect.getById(collection, id1);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("Response: " + response);
+        assertEquals(solrOutputDoc.getFieldValue("ordered_by"), "mpw");
     }
 
     /**
@@ -475,59 +591,39 @@ public class SolrCloudConnectTest {
      */
     @Test
     public void testQuery_SolrParams() throws Exception {
-        System.out.println("query");
-        SolrParams params = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        QueryResponse expResult = null;
-        QueryResponse result = instance.query(params);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        logger.info("testQuery_SolrParams");
+        boolean response = false;
+        QueryResponse queryResponse = null;
+
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            queryResponse = solrConnect.query(solrParams);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("queryResponse: " + queryResponse.getStatus());
+        assertEquals(queryResponse.getStatus(), 0);
     }
 
     /**
      * Test of query method, of class SolrCloudConnect.
      */
     @Test
-    public void testQuery_String_SolrParams() throws Exception {
-        System.out.println("query");
-        String collection = "";
-        SolrParams params = null;
-        SolrCloudConnect instance = new SolrCloudConnect();
-        QueryResponse expResult = null;
-        QueryResponse result = instance.query(collection, params);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+    public void testQuery_SolrParams_Collection() throws Exception {
+        logger.info("testQuery_SolrParams_Collection");
+        boolean response = false;
+        QueryResponse queryResponse = null;
 
-    /**
-     * Test of rollback method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testRollback_String() throws Exception {
-        System.out.println("rollback");
-        String collection = "";
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.rollback(collection);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of rollback method, of class SolrCloudConnect.
-     */
-    @Test
-    public void testRollback_0args() throws Exception {
-        System.out.println("rollback");
-        SolrCloudConnect instance = new SolrCloudConnect();
-        boolean expResult = false;
-        boolean result = instance.rollback();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        try {
+            response = solrConnect.add(solrDoc, commitWithinMs);
+            response = solrConnect.add(solrDoc1, commitWithinMs);
+            queryResponse = solrConnect.query(collection, solrParams);
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception: " + ex);
+        }
+        logger.info("queryResponse: " + queryResponse.getStatus());
+        assertEquals(queryResponse.getStatus(), 0);
     }
 
 }

@@ -80,6 +80,19 @@ public class SolrCloudConnect implements SolrCloud {
     }
 
     /**
+     * Adds a document
+     * 
+     * @param solrInputDocument
+     * @return boolean status
+     * @throws SolrServerException
+     * @throws IOException 
+     */
+    public boolean add(SolrInputDocument solrInputDocument) throws SolrServerException, IOException {
+        UpdateResponse response = solr.add(solrInputDocument);
+        return this.getStatus(response.getStatus());
+    }
+    
+    /**
      * Adds a document, specifying max time before they become committed
      *
      * @param solrInputDocument
@@ -423,31 +436,6 @@ public class SolrCloudConnect implements SolrCloud {
 
     /**
      *
-     * @param collection
-     * @return boolean
-     * @throws org.apache.solr.client.solrj.SolrServerException
-     * @throws java.io.IOException
-     */
-    @Override
-    public boolean rollback(String collection) throws SolrServerException, IOException {
-        UpdateResponse response = solr.rollback(collection);
-        return this.getStatus(response.getStatus());
-    }
-
-    /**
-     *
-     * @return boolean
-     * @throws org.apache.solr.client.solrj.SolrServerException
-     * @throws java.io.IOException
-     */
-    @Override
-    public boolean rollback() throws SolrServerException, IOException {
-        UpdateResponse response = solr.rollback();
-        return this.getStatus(response.getStatus());
-    }
-
-    /**
-     *
      * @param statusVal
      * @return boolean status
      */
@@ -460,5 +448,4 @@ public class SolrCloudConnect implements SolrCloud {
         }
         return status;
     }
-
 }
