@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mw8
  */
-public class SolrCloudConnect implements SolrCloud {
+public class SolrCloudConnect implements SolrConnect {
 
     org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
 

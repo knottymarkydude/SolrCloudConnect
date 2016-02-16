@@ -3,7 +3,6 @@
  */
 package org.search.solr.service.id;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -12,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
+ * Create a unique id.
+ * 
  * @author mw8
  */
 public class UniqueIdTest {

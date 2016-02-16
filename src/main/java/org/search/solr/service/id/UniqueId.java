@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * Create a unique Id to be used in Solr Id field
+ * Create a unique Id
  * 
  * @author mw8
  */
@@ -27,7 +27,7 @@ public class UniqueId {
     
     /**
      *
-     *  Create a new unique id for Solr.
+     *  Create a new unique id from todays date and some random number.
      * 
      * @return String newId
      */
@@ -37,16 +37,18 @@ public class UniqueId {
 
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMHHmmss");
-        Integer randomNum = this.random(100, 2147483647);
+        Integer randomNum = this.random(24754);
         newId = sdf.format(date) + randomNum.toString().trim();
         
         return newId;
     }
 
     
-    private Integer random(final int pMin, final int pMax) {
+    private int random(final int pMax) {
         int randomInt = RANDOM.nextInt(pMax);
-        Integer randomVal = pMin + randomInt * (pMax - pMin);
+        logger.info("randomInt:  " + randomInt);
+        int randomVal = randomInt * pMax;
+        logger.info("randomVal:  " + randomVal);
         return randomVal;
     }
 }

@@ -20,7 +20,7 @@ import org.apache.solr.common.params.SolrParams;
  * 
  * @author mw8
  */
-public interface SolrCloud {
+public interface SolrConnect {
     
     public boolean pingServer() throws SolrServerException, IOException;
     public SolrPingResponse pingServerDetails()  throws SolrServerException, IOException;

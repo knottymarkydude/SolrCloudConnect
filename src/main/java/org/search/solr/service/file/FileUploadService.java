@@ -13,7 +13,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
+ * File Upload Service
+ * 
  * @author mw8
+ * 
+ * @since Feb 2016
  */
 public class FileUploadService {
     Logger logger = LoggerFactory.getLogger(getClass());
@@ -49,5 +53,32 @@ public class FileUploadService {
         }
         return destFile.exists();
 
+    }
+    
+    /**
+     * 
+     * @param newFilename
+     * @param origFilename
+     * @return boolean result
+     */
+    public boolean setNewFilename(String newFilename, String origFilename) {
+
+        boolean renamed = false;
+        boolean checkCanWrite = false;
+
+        try {
+
+            File newFile = new File(newFilename);
+            File origFile = new File(origFilename);
+
+            if (origFile.exists()) {
+                renamed = origFile.renameTo(newFile);
+            }
+
+        } catch (Exception e) {
+            logger.error("Exception", e);
+        }
+
+        return renamed;
     }
 }
