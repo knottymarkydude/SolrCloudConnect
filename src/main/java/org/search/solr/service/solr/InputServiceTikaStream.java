@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.logging.Level;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.tika.metadata.Metadata;
@@ -38,6 +37,15 @@ public class InputServiceTikaStream extends InputServiceTika {
     private String ipFile;
     private String collection;
 
+    public InputServiceTikaStream(SolrInputDocument sid) {
+        this.sid = sid;
+    }
+
+    public InputServiceTikaStream(SolrInputDocument sid, String collection) {
+        this.sid = sid;
+        this.collection = collection;
+    }
+
     public InputServiceTikaStream(SolrInputDocument sid, InputStream is) {
         this.sid = sid;
         this.is = is;
@@ -50,12 +58,29 @@ public class InputServiceTikaStream extends InputServiceTika {
     }
 
     /**
+     * Process Document and send Data to Solr
+     *
+     * @return status
+     */
+    public boolean inputDataService() {
+        boolean status = false;
+        
+        status = this.processTikaDoc(is);
+        
+        if (status){
+            status = super.sendData(sid);
+        }
+
+        return status;
+    }
+
+    /**
      * Add Tika Doc to SolrInputDocument
      *
      * @param is
      * @return boolean status
      */
-    public boolean processTikaDoc(InputStream is) {
+    private boolean processTikaDoc(InputStream is) {
         boolean status = false;
         SolrInputField idField = null;
         SolrInputField contentType = null;
@@ -87,23 +112,25 @@ public class InputServiceTikaStream extends InputServiceTika {
                 //Add directory and create it if it's not there
                 LocalDate thisMonthYear = LocalDate.now();
                 String currentDocDir = DateUtility.getFormattedDate(thisMonthYear, "YYYYMM");
-                dirOk = this.checkDirStatus(currentDocDir);
+                dirOk = super.checkDirStatus(currentDocDir, collection);
                 sid.addField("directory", currentDocDir);
-                
+
                 //Add Filename
                 FileType fileType = new FileType();
                 String fileExtension = fileType.getExtension(is);
-                
+
                 String newDocName = solrDocId + fileExtension;
                 sid.addField("filename", newDocName);
-                
-                //Upload file to repository
-                boolean fileUploadStatus = this.uploadFileToDir(newDocName, currentDocDir);
-                
-                //If all status flags ok, upload data to Solr
-                
-            }
 
+                //Upload file to repository
+                boolean fileUploadStatus = super.uploadFileToDir(is, newDocName, currentDocDir, collection);
+
+                //If all status flags ok, upload data to Solr 
+                if (dirOk && fileUploadStatus) {
+                    status = true;
+                }
+
+            }
         } catch (FileNotFoundException ex) {
             logger.error("Exception" + InputServiceTika.class.getName() + ex);
         } catch (IOException ex) {
@@ -113,70 +140,6 @@ public class InputServiceTikaStream extends InputServiceTika {
         return status;
     }
 
-    /**
-     * Upload file to Repository
-     * 
-     * @param docName
-     * @return 
-     */
-    private boolean uploadFileToDir(String docName, String docDir) throws IOException {
-        boolean status = false;
-
-        String repository = this.getRepositoryDir(collection);
-        
-        String fileDestination = repository + docDir + "/" + docName;
-        
-        FileUploadService uploadService = new FileUploadService();
-        status = uploadService.moveFile(is, fileDestination);
-        
-        return status;
-    }
-
-    public boolean doInputData() {
-        boolean status = false;
-
-        return status;
-    }
-
-    /**
-     * Check to see if the directory exists, and if not, create it.
-     * 
-     * @param currentDocDir
-     * @return 
-     */
-    private boolean checkDirStatus(String currentDocDir) {
-        boolean status = false;
-
-        File currentFileDir = new File(this.getRepositoryDir(collection) + currentDocDir);
-        
-        //Does directory exist, if it doesn't then create it.
-        if (currentFileDir.exists()){
-            status = true;
-        }else{
-            status = currentFileDir.mkdir();
-        }
-        
-        logger.debug("Directory Status: " + currentFileDir.exists());
-       
-        return status;
-
-    }
     
-    
-    /**
-     * 
-     * @param collection
-     * @return String respositoryDir
-     */
-    private String getRepositoryDir(String collection){
- 
-        String propFile = collection + ".properties";
-        
-        DefaultProperties prop = new DefaultProperties(propFile);
-        
-        String respositoryDir = prop.getPropValue("doc_live_directory");
-        
-        return respositoryDir;
-    }
 
 }

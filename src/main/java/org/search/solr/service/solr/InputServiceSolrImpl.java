@@ -5,8 +5,6 @@ package org.search.solr.service.solr;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.search.solr.connect.SolrCloudConnect;
