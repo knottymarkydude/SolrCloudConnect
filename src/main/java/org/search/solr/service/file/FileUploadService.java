@@ -7,7 +7,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +55,27 @@ public class FileUploadService {
         if (destination != null) {
             destination.close();
         }
+        return destFile.exists();
+
+    }
+    
+    /**
+     * 
+     * Move InputStream to File
+     * 
+     * @param is
+     * @param destFileName
+     * @return boolean
+     * @throws IOException 
+     */
+    public boolean moveFile(InputStream is, String destFileName) throws IOException {
+        
+        File destFile = new File(destFileName);
+        
+        Path destFilePath = new File(destFileName).toPath();
+        
+        Files.copy(is, destFilePath, StandardCopyOption.REPLACE_EXISTING);
+                
         return destFile.exists();
 
     }
