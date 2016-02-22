@@ -32,6 +32,9 @@ public class InputServiceSolrImpl implements InputServiceSolr {
         SolrCloudConnect solrConnect = new SolrCloudConnect();
         try {
             status = solrConnect.add(solrDoc);
+            if(status){
+                status = solrConnect.commit();
+            }
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception:: "+ ex);
         }
@@ -51,6 +54,9 @@ public class InputServiceSolrImpl implements InputServiceSolr {
         SolrCloudConnect solrConnect = new SolrCloudConnect();
         try {
             status = solrConnect.add(solrDocs);
+            if(status){
+                status = solrConnect.commit();
+            }
         } catch (SolrServerException | IOException ex) {
             logger.error("Exception:: "+ ex);
         }

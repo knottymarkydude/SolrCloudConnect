@@ -68,7 +68,7 @@ public class FileUploadService {
      * @return boolean
      * @throws IOException 
      */
-    public boolean moveFile(InputStream is, String destFileName) throws IOException {
+    public boolean copyFile(InputStream is, String destFileName) throws IOException {
         
         File destFile = new File(destFileName);
         

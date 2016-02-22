@@ -3,12 +3,11 @@
  */
 package org.search.solr.service.solr;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
-import org.search.solr.connect.SolrCloudConnect;
 import org.search.solr.service.file.FileUploadService;
 import org.search.solr.service.id.UniqueId;
 import org.search.utils.DefaultProperties;
@@ -51,7 +50,20 @@ public class InputServiceTika extends InputServiceSolrImpl {
         String fileDestination = repository + docDir + "/" + docName;
 
         FileUploadService uploadService = new FileUploadService();
-        status = uploadService.moveFile(is, fileDestination);
+        status = uploadService.copyFile(is, fileDestination);
+
+        return status;
+    }
+    
+    public boolean uploadFileToDir(BufferedInputStream bis, String docName, String docDir, String collection) throws IOException {
+        boolean status = false;
+
+        String repository = this.getRepositoryDir(collection);
+
+        String fileDestination = repository + docDir + "/" + docName;
+
+        FileUploadService uploadService = new FileUploadService();
+        status = uploadService.copyFile(bis, fileDestination);
 
         return status;
     }

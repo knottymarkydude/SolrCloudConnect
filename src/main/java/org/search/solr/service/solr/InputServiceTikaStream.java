@@ -3,10 +3,14 @@
  */
 package org.search.solr.service.solr;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -14,7 +18,6 @@ import org.apache.tika.metadata.Metadata;
 import org.search.solr.service.docs.tika.TikaDoc;
 import org.search.solr.service.docs.tika.TikaProcessor;
 import org.search.solr.service.file.FileType;
-import org.search.solr.service.file.FileUploadService;
 import org.search.solr.utilities.date.DateUtility;
 import org.search.utils.DefaultProperties;
 import org.slf4j.Logger;
@@ -88,12 +91,16 @@ public class InputServiceTikaStream extends InputServiceTika {
         TikaDoc tikaDoc;
         Metadata metadata;
         TikaProcessor tikaProcessor = new TikaProcessor();
-        sid = new SolrInputDocument();
         boolean dirOk = false;
+        boolean fileUploadStatus = false;
 
         try {
             tikaDoc = tikaProcessor.processInputStream(is);
 
+            if (!tikaDoc.getFileContent().isEmpty()){
+                status = true;
+            }
+            
             //Add content to SolrInputDocument
             logger.debug("add Content to SolrInputDoc");
             sid.addField("content", tikaDoc.getFileContent());
@@ -117,29 +124,49 @@ public class InputServiceTikaStream extends InputServiceTika {
 
                 //Add Filename
                 FileType fileType = new FileType();
-                String fileExtension = fileType.getExtension(is);
+                String fileExtension = fileType.getFileType(metadata);
 
                 String newDocName = solrDocId + fileExtension;
                 sid.addField("filename", newDocName);
-
+                
+                String destFileName = this.getRepositoryDir(collection) + currentDocDir +"/"+ newDocName;
+                File destFile = new File(destFileName);
+        
+                Path destFilePath = new File(destFileName).toPath();
                 //Upload file to repository
-                boolean fileUploadStatus = super.uploadFileToDir(is, newDocName, currentDocDir, collection);
+                BufferedInputStream bis = new BufferedInputStream(is);
+                Files.copy(is, destFilePath, StandardCopyOption.REPLACE_EXISTING);
+                //fileUploadStatus = super.uploadFileToDir(bis, newDocName, currentDocDir, collection);
 
-                //If all status flags ok, upload data to Solr 
-                if (dirOk && fileUploadStatus) {
-                    status = true;
+                //If all status flags ok, upload data to Solr
+                if(!dirOk && !fileUploadStatus ){
+                    status = false;
                 }
-
             }
         } catch (FileNotFoundException ex) {
             logger.error("Exception" + InputServiceTika.class.getName() + ex);
+            status = false;
         } catch (IOException ex) {
             logger.error("Exception" + InputServiceTika.class.getName() + ex);
+            status = false;
         }
 
         return status;
     }
-
     
+    /**
+     *
+     * @param collection
+     * @return String respositoryDir
+     */
+    private String getRepositoryDir(String collection) {
 
+        String propFile = collection + ".properties";
+
+        DefaultProperties prop = new DefaultProperties(propFile);
+
+        String respositoryDir = prop.getPropValue("doc_live_directory");
+
+        return respositoryDir;
+    }
 }

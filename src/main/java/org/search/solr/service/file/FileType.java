@@ -3,16 +3,7 @@
  */
 package org.search.solr.service.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,50 +18,77 @@ public class FileType {
 
     /**
      *
-     * @param inputStream
+     * @param metadata
      * @return String
      */
-    public String getExtension(InputStream inputStream){
+    public String getFileType(Metadata metadata) {
         String extension = null;
-        try {
-            extension = this.getMimeTypeExt(inputStream);
-
-        } catch (MimeTypeException | IOException ex) {
-            LOGGER.error("IOException in " + FileType.class.getName(), ex);
-        }
+        String fileType = FileType.getContentType(metadata);
+        extension = this.getFileExtension(fileType);
         return extension;
 
     }
 
     /**
      *
-     * @param file
-     * @return String
+     * @param contentType
+     * @return String fileExtension
      */
-    public String getExtension(File file) {
-        String extension = null;
-        InputStream inputStream;
+    private String getFileExtension(String contentType) {
+        String extension = "unknown";
 
-        try {
-            inputStream = new FileInputStream(file);
-            extension = this.getMimeTypeExt(inputStream);
-
-        } catch (MimeTypeException | IOException ex) {
-            LOGGER.error("IOException in " + FileType.class.getName(), ex);
+        switch (contentType) {
+            case "application/pdf":
+                extension = ".pdf";
+                break;
+            case "image/png":
+                extension = ".png";
+                break;
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                extension = ".docx";
+                break;
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                extension = ".pptx";
+                break;
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                extension = ".xlsx";
+                break;
+                case "application/vnd.ms-excel.sheet.macroenabled.12":
+                extension = ".xlsx";
+                break;
+            case "image/jpeg":
+                extension = ".jpg";
+                break;
+            case "application/vnd.ms-excel":
+                extension = ".xls";
+                break;
+            case "application/vnd.ms-powerpoint":
+                extension = ".ppt";
+                break;
+            case "application/zip":
+                extension = ".zip";
+                break;
+            case "image/tiff":
+                extension = ".tif";
+                break;
+            case "application/msword":
+                extension = ".doc";
+                break;
+            case "text/html":
+                extension = ".html";
+                break;
+            case "text/plain":
+                extension = ".txt";
+                break;
+            case "video/x-msvideo":
+                extension = ".avi";
+                break;
+            case "video/mp4":
+                extension = ".mp4";
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid, file extension not supported: " + extension);
         }
-        return extension;
-
-    }
-
-    private String getMimeTypeExt(InputStream inputStream) throws IOException, MimeTypeException {
-        String extension = null;
-
-        TikaConfig config = TikaConfig.getDefaultConfig();
-
-        MediaType mediaType = config.getMimeRepository().detect(inputStream, new Metadata());
-        MimeType mimeType = config.getMimeRepository().forName(mediaType.toString());
-
-        extension = mimeType.getExtension();
 
         return extension;
     }

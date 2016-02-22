@@ -6,7 +6,9 @@
 package org.search.solr.service.file;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,11 +80,25 @@ public class FileUploadServiceTest {
     public void testSetNewFilename() {
         logger.debug("testSetNewFilename");
 
-        String newFilename = dirSource + filename3;
-        String origFilename = dirSource + filename2;
+        //newFilename = dirSource + filename3;
+        //origFilename = dirSource + filename2;
 
         boolean expResult = true;
         boolean result = fus.setNewFilename(newFilename, origFilename);
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of moveFile method, of class FileUploadService.
+     */
+    @Test
+    public void testMoveFile() throws Exception {
+        logger.debug("testMoveFile");
+        InputStream is = new FileInputStream("/Users/mw8/Desktop/journals/test1.pdf");
+        String destFileName = "/www/data/spar/201602/testMoveFileFromIS.pdf";
+        
+        boolean expResult = true;
+        boolean result = fus.copyFile(is, destFileName);
         assertEquals(expResult, result);
     }
 

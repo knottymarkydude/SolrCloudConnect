@@ -57,7 +57,7 @@ public class TikaProcessor {
                 //metadataNames = metadata.names();
                 tikaDoc.setMetaData(metadata);
                 tikaDoc.setFileContent(handler.toString());
-                
+        
             } catch (IOException ex) {
                 logger.error("IOException in " + TikaProcessor.class.getName(), ex);
             } catch (SAXException ex) {
