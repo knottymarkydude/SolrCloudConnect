@@ -46,7 +46,7 @@ public class TikaProcessor {
                 Metadata metadata = new Metadata();
                 ParseContext pcontext = new ParseContext();
                 
-                bis = new BufferedInputStream(input);
+                bis = new BufferedInputStream(stream);
                 handler = new BodyContentHandler(-1); // Unlimited
 
                 Parser parser = new AutoDetectParser();
@@ -66,7 +66,7 @@ public class TikaProcessor {
                 logger.error("TikaException in " + TikaProcessor.class.getName(), ex);
             } finally {
                 try {
-                    input.close();
+                    bis.close();
                 } catch (IOException ex) {
                     logger.error("IOException in " + TikaProcessor.class.getName(), ex);
                 }

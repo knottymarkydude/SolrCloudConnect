@@ -55,15 +55,18 @@ public class InputServiceTika extends InputServiceSolrImpl {
         return status;
     }
     
-    public boolean uploadFileToDir(BufferedInputStream bis, String docName, String docDir, String collection) throws IOException {
+    /**
+     * 
+     * @param bis
+     * @param filePath
+     * @return boolean status
+     * @throws IOException 
+     */
+    public boolean uploadFileToDir(BufferedInputStream bis, String filePath) throws IOException {
         boolean status = false;
 
-        String repository = this.getRepositoryDir(collection);
-
-        String fileDestination = repository + docDir + "/" + docName;
-
         FileUploadService uploadService = new FileUploadService();
-        status = uploadService.copyFile(bis, fileDestination);
+        status = uploadService.copyFile(bis, filePath);
 
         return status;
     }
@@ -73,7 +76,7 @@ public class InputServiceTika extends InputServiceSolrImpl {
      * @param collection
      * @return String respositoryDir
      */
-    private String getRepositoryDir(String collection) {
+    String getRepositoryDir(String collection) {
 
         String propFile = collection + ".properties";
 

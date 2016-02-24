@@ -61,7 +61,7 @@ public class FileUploadService {
     
     /**
      * 
-     * Move InputStream to File
+     * Copy InputStream to File
      * 
      * @param is
      * @param destFileName
@@ -98,6 +98,10 @@ public class FileUploadService {
 
             if (origFile.exists()) {
                 renamed = origFile.renameTo(newFile);
+            }
+            
+            if (renamed){
+                origFile.delete();
             }
 
         } catch (Exception e) {

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * Test Tika Service
+ * Test Tika Service. Using Spar Collection
  *
  * @author mw8
  */
@@ -47,43 +47,10 @@ public class InputServiceTikaStreamTest {
      * Test of inputDataService method, of class InputServiceTikaStream.
      */
     @Test
-    public void testInputDataServiceWithId() {
-        try {
-            logger.info("testInputDataServiceWithId");
-
-            File testFile = new File("/Users/mw8/Desktop/journals/test2.pdf");
-            is = new FileInputStream(testFile);
-
-            sid = new SolrInputDocument();
-            sid.addField("id", "31051965", 1.0f);
-            sid.addField("title", "jUnit Test with Id");
-            sid.addField("authors", "Mr Benn");
-            sid.addField("description", "Test document with Id, zibzob");
-            sid.addField("pmid", "456645645");
-            sid.addField("doi", "4564566654/456mpw");
-            sid.addField("content_type", "application/pdf");
-            sid.addField("directory", "201512");
-            sid.addField("filename", "201512122913580082616.pdf");
-            sid.addField("ordered_by", "knottymarkdude");
-
-            inputServiceTikaStream = new InputServiceTikaStream(sid, is, collection);
-
-            boolean expResult = true;
-            boolean result = inputServiceTikaStream.inputDataService();
-            assertEquals(expResult, result);
-        } catch (FileNotFoundException ex) {
-            logger.error("FileNotFoundException: " + ex);
-        }
-    }
-
-    /**
-     * Test of inputDataService method, of class InputServiceTikaStream.
-     */
-    @Test
     public void testInputDataServiceNoId() {
+        logger.info("testInputDataServiceNoId");
+        
         try {
-            logger.info("testInputDataServiceNoId");
-
             File testFile = new File("/Users/mw8/Desktop/journals/test1.pdf");
             is = new FileInputStream(testFile);
 
@@ -93,9 +60,9 @@ public class InputServiceTikaStreamTest {
             sid.addField("description", "Test document No Id, zibzob");
             sid.addField("pmid", "456645645");
             sid.addField("doi", "4564566654/n01d");
-            sid.addField("ordered_by", "knottymarkdude");
+            sid.addField("ordered_by", "mpw");
 
-            inputServiceTikaStream = new InputServiceTikaStream(sid, is, collection);
+            inputServiceTikaStream = new InputServiceTikaStream(collection, sid, is);
 
             boolean expResult = true;
             boolean result = inputServiceTikaStream.inputDataService();
