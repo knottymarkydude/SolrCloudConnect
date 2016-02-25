@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mw8
  */
-public class InputServiceTikaStream extends InputServiceTika {
+public class InputServiceTikaSidStream extends InputServiceTika {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -48,7 +48,7 @@ public class InputServiceTikaStream extends InputServiceTika {
     private InputStream is;
     private NewSolrDoc newSolrDoc;
 
-    public InputServiceTikaStream(String collection, SolrInputDocument sid, InputStream is) {
+    public InputServiceTikaSidStream(String collection, SolrInputDocument sid, InputStream is) {
         this.is = null;
         this.collection = collection;
         this.sid = sid;
@@ -190,5 +190,4 @@ public class InputServiceTikaStream extends InputServiceTika {
         return status;
     }
 
-    
 }

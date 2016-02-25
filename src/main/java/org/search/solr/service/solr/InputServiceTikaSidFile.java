@@ -9,43 +9,39 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.tika.metadata.Metadata;
 import org.search.solr.service.docs.tika.TikaDoc;
 import org.search.solr.service.docs.tika.TikaProcessor;
-import org.search.solr.service.file.FileType;
-import org.search.solr.service.file.FileUploadService;
-import org.search.solr.service.solr.docs.NewSolrDoc;
-import org.search.solr.utilities.date.DateUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * Input SolrInputDocument. Uploads file to Solr.
+ * Input SolrInputDocument. Uploads the web form data to a SolrInputDocument.
  *
  * The field called filename references a document kept in the repository. To
  * update the form data, the file needs to be parsed again, and added to the
  * content field
  *
- * This class is used to get a file from the command line and transformed into
- * an InputStream.
+ * This class is used to edit data from a web form that has a reference to a
+ * file, that is transformed into an InputStream.
  *
  * @author mw8
  */
-public class InputServiceTikaFile extends InputServiceTika {
+public class InputServiceTikaSidFile extends InputServiceTika {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
     private final String collection;
-    private SolrInputDocument sid;
-    private String tikaFile;
-    private NewSolrDoc newSolrDoc;
 
-    public InputServiceTikaFile(String collection, String tikaFile) {
+    @SuppressWarnings("FieldMayBeFinal")
+    private SolrInputDocument sid;
+    
+    public InputServiceTikaSidFile(String collection, SolrInputDocument sid) {
         this.collection = collection;
-        this.tikaFile = tikaFile;
+        this.sid = sid;
+
     }
 
     /**
@@ -59,7 +55,7 @@ public class InputServiceTikaFile extends InputServiceTika {
         // Upload file to repository 
         String filePath = null;
         try {
-            fileForSolr = this.uploadFileToRepository();
+            fileForSolr = this.getFileFromRepository();
         } catch (IOException ex) {
             logger.error("IOException: " + ex);
         }
@@ -83,44 +79,23 @@ public class InputServiceTikaFile extends InputServiceTika {
 
     /**
      *
-     * Uploads document to the repository
+     * Get file from repository
      *
      * @return String filename
      * @throws IOException
      */
-    private File uploadFileToRepository() throws IOException {
-        String solrDocId = super.generateId();
+    private File getFileFromRepository() throws IOException {
         boolean status = false;
-        newSolrDoc = new NewSolrDoc();
-        newSolrDoc.setSolrId(solrDocId);
-
-        //Check directory and create it if it's not there
-        LocalDate thisMonthYear = LocalDate.now();
-        String currentDocDir = DateUtility.getFormattedDate(thisMonthYear, "YYYYMM");
-        boolean dirOk = super.checkDirStatus(currentDocDir, collection);
-        if (dirOk) {
-            newSolrDoc.setCurrentDir(currentDocDir);
-        }
 
         String repository = super.getRepositoryDir(collection);
-        newSolrDoc.setRepository(repository);
+        String directory = sid.getFieldValue("directory").toString();
+        String filename = sid.getFieldValue("filename").toString();
 
-        File sourceFile = new File(this.tikaFile);
-        newSolrDoc.setFilename(sourceFile.getName());
+        String currentFilePath = repository + "/" + directory + "/" + filename;
 
-        String destFileName = repository + currentDocDir + "/" + sourceFile.getName();
+        File currentFile = new File(currentFilePath);
 
-        newSolrDoc.setFilePath(destFileName);
-        File destFile = new File(destFileName);
-        //Path destFilePath = new File(destFileName).toPath();
-
-        //If directory exists
-        if (dirOk) {
-            FileUploadService fileUploadService = new FileUploadService();
-            status = fileUploadService.copyFile(sourceFile, destFile);
-        }
-
-        return destFile;
+        return currentFile;
     }
 
     /**
@@ -145,18 +120,10 @@ public class InputServiceTikaFile extends InputServiceTika {
             sid.addField("content", tikaDoc.getFileContent());
 
             logger.info("Content Value" + sid.getField("content").getValueCount());
-            if (sid.getField("content").getValueCount() > 0) {
+            if (sid.getField("content").getValueCount() > 0 ) {
                 status = true;
             }
-
-            //add content_type field
-            metadata = tikaDoc.getMetaData();
-            sid.addField("content_type", FileType.getContentType(metadata));
-            String currentDocDir = newSolrDoc.getCurrentDir();
-            sid.addField("directory", currentDocDir);
-            sid.addField("filename", newSolrDoc.getFilename());
-            sid.addField("filename", newSolrDoc.getSolrId());
-
+            
         } catch (FileNotFoundException ex) {
             logger.error("Exception" + InputServiceTika.class.getName() + ex);
             status = false;

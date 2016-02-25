@@ -19,15 +19,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author mw8
  */
-public class InputServiceTikaFileTest {
+public class InputServiceTikaSidFileTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    InputServiceTikaFile inputServiceTikaFile;
+    InputServiceTikaSidFile inputServiceTikaFile;
     SolrInputDocument sid;
     String collection;
 
-    public InputServiceTikaFileTest() {
+    public InputServiceTikaSidFileTest() {
     }
 
     @Before
@@ -40,7 +40,7 @@ public class InputServiceTikaFileTest {
     }
 
     /**
-     * Test of inputDataService method, of class InputServiceTikaFile.
+     * Test of inputDataService method, of class InputServiceTikaSidFile.
      */
     @Test
     public void testInputDataService() {
@@ -60,7 +60,7 @@ public class InputServiceTikaFileTest {
         sid.addField("content_type", "application/pdf");
         sid.addField("date_published", "2016");
         
-        inputServiceTikaFile  = new InputServiceTikaFile(collection, sid);
+        inputServiceTikaFile  = new InputServiceTikaSidFile(collection, sid);
         
         boolean expResult = true;
         boolean result = inputServiceTikaFile.inputDataService();

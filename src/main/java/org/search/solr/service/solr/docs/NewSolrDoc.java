@@ -13,6 +13,7 @@ public class NewSolrDoc {
     private String currentDir;
     private String repository;
     private String filePath;
+    private String filename;
 
     public String getSolrId() {
         return solrId;
@@ -46,11 +47,17 @@ public class NewSolrDoc {
         this.filePath = filePath;
     }
 
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     @Override
     public String toString() {
-        return "NewSolrDoc{" + "solrId=" + solrId + ", currentDir=" + currentDir + ", repository=" + repository + ", filePath=" + filePath + '}';
+        return "NewSolrDoc{" + "solrId=" + solrId + ", currentDir=" + currentDir + ", repository=" + repository + ", filePath=" + filePath + ", filename=" + filename + '}';
     }
-    
-    
-    
+
 }

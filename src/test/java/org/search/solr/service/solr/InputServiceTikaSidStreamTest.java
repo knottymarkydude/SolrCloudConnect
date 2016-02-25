@@ -21,16 +21,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author mw8
  */
-public class InputServiceTikaStreamTest {
+public class InputServiceTikaSidStreamTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    InputServiceTikaStream inputServiceTikaStream;
+    InputServiceTikaSidStream inputServiceTikaStream;
     SolrInputDocument sid;
     InputStream is;
     String collection;
 
-    public InputServiceTikaStreamTest() {
+    public InputServiceTikaSidStreamTest() {
 
     }
 
@@ -44,7 +44,7 @@ public class InputServiceTikaStreamTest {
     }
 
     /**
-     * Test of inputDataService method, of class InputServiceTikaStream.
+     * Test of inputDataService method, of class InputServiceTikaSidStream.
      */
     @Test
     public void testInputDataServiceNoId() {
@@ -62,7 +62,7 @@ public class InputServiceTikaStreamTest {
             sid.addField("doi", "4564566654/n01d");
             sid.addField("ordered_by", "mpw");
 
-            inputServiceTikaStream = new InputServiceTikaStream(collection, sid, is);
+            inputServiceTikaStream = new InputServiceTikaSidStream(collection, sid, is);
 
             boolean expResult = true;
             boolean result = inputServiceTikaStream.inputDataService();

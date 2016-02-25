@@ -489,8 +489,8 @@ public class SolrCloudConnectTest {
             response = solrConnect.add(solrDoc1, commitWithinMs);
             results = solrConnect.getById(ids);
 
-            results.stream().forEach((solrDoc) -> {
-                logger.info(solrDoc.toString());
+            results.stream().forEach((solrDocument) -> {
+                logger.info(solrDocument.toString());
             });
 
         } catch (SolrServerException | IOException ex) {
