@@ -117,9 +117,21 @@ public class InputServiceTika extends InputServiceSolrImpl {
      * @return boolean status
      */
     @Override
-    public boolean sendData(SolrInputDocument solrDoc) {
+    public boolean sendData(SolrInputDocument sid) {
         boolean status = false;
-        return super.sendData(solrDoc);
+        return super.sendData(sid);
+    }
+
+    /**
+     * 
+     * @param sid
+     * @param collection
+     * @return boolean status
+     */
+    @Override
+    boolean sendData(SolrInputDocument sid, String collection) {
+        boolean status = false;
+        return super.sendData(sid, collection);
     }
 
 }

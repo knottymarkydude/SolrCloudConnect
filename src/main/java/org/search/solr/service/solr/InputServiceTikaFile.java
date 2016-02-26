@@ -75,7 +75,7 @@ public class InputServiceTikaFile extends InputServiceTika {
         }
 
         if (status) {
-            status = super.sendData(sid);
+            status = super.sendData(sid, this.collection);
         }
 
         return status;
@@ -134,6 +134,7 @@ public class InputServiceTikaFile extends InputServiceTika {
         TikaDoc tikaDoc;
         Metadata metadata;
         TikaProcessor tikaProcessor = new TikaProcessor();
+        sid = new SolrInputDocument();
 
         try {
             BufferedInputStream bis = new BufferedInputStream(solrIs);
@@ -155,7 +156,7 @@ public class InputServiceTikaFile extends InputServiceTika {
             String currentDocDir = newSolrDoc.getCurrentDir();
             sid.addField("directory", currentDocDir);
             sid.addField("filename", newSolrDoc.getFilename());
-            sid.addField("filename", newSolrDoc.getSolrId());
+            sid.addField("id", newSolrDoc.getSolrId());
 
         } catch (FileNotFoundException ex) {
             logger.error("Exception" + InputServiceTika.class.getName() + ex);

@@ -23,7 +23,7 @@ public class InputServiceSolrImpl implements InputServiceSolr {
     /**
      *
      * @param solrDoc
-     * @return
+     * @return status
      */
     @Override
     public boolean sendData(SolrInputDocument solrDoc){
@@ -45,7 +45,7 @@ public class InputServiceSolrImpl implements InputServiceSolr {
     /**
      * 
      * @param solrDocs
-     * @return 
+     * @return boolean status
      */
     @Override
     public boolean sendData(Collection<SolrInputDocument> solrDocs){
@@ -54,6 +54,28 @@ public class InputServiceSolrImpl implements InputServiceSolr {
         SolrCloudConnect solrConnect = new SolrCloudConnect();
         try {
             status = solrConnect.add(solrDocs);
+            if(status){
+                status = solrConnect.commit();
+            }
+        } catch (SolrServerException | IOException ex) {
+            logger.error("Exception:: "+ ex);
+        }
+        
+        return status;
+    }
+
+    /**
+     * 
+     * @param sid
+     * @param collection
+     * @return boolean status
+     */
+    boolean sendData(SolrInputDocument sid, String collection) {
+        boolean status = false;
+        
+        SolrCloudConnect solrConnect = new SolrCloudConnect(collection);
+        try {
+            status = solrConnect.add(sid);
             if(status){
                 status = solrConnect.commit();
             }

@@ -4,9 +4,6 @@
 package org.search.solr.service.solr;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.Before;

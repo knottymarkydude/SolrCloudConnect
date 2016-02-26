@@ -36,7 +36,8 @@ public class SolrCloudConnect implements SolrConnect {
 
     
     /**
-     *  Creates connection to Solr Instance from property zkHost in properties file. Sets the default collection from property defaultCollection
+     *  Creates connection to Solr Instance from property zkHost in properties file. 
+     *  Sets the default collection from property defaultCollection
      */
     public SolrCloudConnect() {
 
@@ -45,6 +46,21 @@ public class SolrCloudConnect implements SolrConnect {
         this.defaultCollection = props.getPropValue("defaultCollection");
         solr = new CloudSolrClient(zkHostPropVal);
         solr.setDefaultCollection(defaultCollection);
+        solr.connect();
+
+    }
+    
+    /**
+     *  Creates connection to Solr Instance from property zkHost in properties file. 
+     *  Sets the default collection from parameter
+     */
+    public SolrCloudConnect(String collection) {
+
+        SolrProperties props = new SolrProperties();
+        zkHostPropVal = props.getPropValue(zkHostKey);
+        this.defaultCollection = props.getPropValue("defaultCollection");
+        solr = new CloudSolrClient(zkHostPropVal);
+        solr.setDefaultCollection(collection);
         solr.connect();
 
     }
