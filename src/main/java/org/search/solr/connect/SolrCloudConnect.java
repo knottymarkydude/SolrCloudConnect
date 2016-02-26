@@ -341,7 +341,7 @@ public class SolrCloudConnect implements SolrConnect {
      * @param query
      * @return boolean
      * @throws org.apache.solr.client.solrj.SolrServerException
-     * @throws java.io.IOException
+     * @throws java.io.IOException 
      */
     @Override
     public boolean deleteByQuery(String collection, String query) throws SolrServerException, IOException {

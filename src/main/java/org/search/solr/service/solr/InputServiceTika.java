@@ -113,7 +113,7 @@ public class InputServiceTika extends InputServiceSolrImpl {
 
     /**
      * 
-     * @param solrDoc
+     * @param sid
      * @return boolean status
      */
     @Override

@@ -11,7 +11,7 @@ package org.search.solr;
 public class Greeter {
     
     public String sayHello(String message){
-        return "You have just sent a ping to the Solr Server, it took " + message + "mS";
+        return "You have just sent a file to the Server, it took " + message;
     }
     
 }

@@ -1,16 +1,10 @@
 /*
  * Solr 5 Connect
  */
-
 package org.search.solr;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.joda.time.LocalTime;
-import org.search.solr.connect.SolrCloudConnect;
+import org.search.solr.service.solr.InputServiceTikaFile;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,35 +12,43 @@ import org.slf4j.LoggerFactory;
  * @author mw8
  */
 public class SolrRun {
-    
+
     org.slf4j.Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     public static void main(String[] args) {
+
+        String collection;
+        String document;
+        boolean result = false;
         
-        LocalTime currentTime = new LocalTime();
+        LocalTime startTime = new LocalTime();
+        System.out.println("Start Time: " + startTime.toString("hh:mm:ss"));
         
-        try {
+        if (args.length > 0) {
+            for (String s : args) {
+                System.out.println("Args :" + s);
+            }
+            collection = args[0];
+            document = args[1];
             
-            System.out.println("The current local time is: " + currentTime);
+            InputServiceTikaFile inputServiceTikaFile = new InputServiceTikaFile(collection, document);
             
-            SolrCloudConnect solr = new SolrCloudConnect();
+            result = inputServiceTikaFile.inputDataService();
             
-            SolrPingResponse ping = solr.pingServerDetails();
+            if (result){
+                System.out.println("File successfully added");
+            }else{
+                System.out.println("Unable to add file");
+            }
             
-            long elapsedTime = ping.getElapsedTime();
-            
-            //System.out.println("Ping Elapsed Time: " + elapsedTime );
-            
-            String et = String.valueOf(elapsedTime);
-            
-            Greeter greeter = new Greeter();
-            
-            System.out.println(greeter.sayHello(et));
-        } catch (SolrServerException | IOException ex) {
-            Logger.getLogger(SolrRun.class.getName()).log(Level.SEVERE, null, ex);
+        }else{
+            System.out.println("No arguments, you must add the collection and document to add, for example");
+            System.out.println("java -jar build/libs/SolrCloudConnect-all.jar lego /mydir/thisdoc.pdf");
         }
-    
-    
-    
-  }
+        //String et = String.valueOf(currentTime.toString("hh:mm:ss"));
+        //Greeter greeter = new Greeter();
+        //System.out.println(greeter.sayHello(et));
+        LocalTime endTime = new LocalTime();
+         System.out.println("Finish Time: " + endTime.toString("hh:mm:ss"));
+    }
 }

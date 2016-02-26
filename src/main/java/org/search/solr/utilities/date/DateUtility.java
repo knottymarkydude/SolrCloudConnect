@@ -27,7 +27,7 @@ public class DateUtility {
      *
      * Get a Formatted date
      * 
-     * @param sDate
+     * @param aDate
      * @param format
      * @return String in correct format
      */
