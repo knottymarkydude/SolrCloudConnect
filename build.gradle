@@ -1,12 +1,15 @@
 plugins {
   id 'java' // or 'groovy' Must be explicitly applied
+  // Run gradle shadowJar to include all required jar files
+  // Jar file will be named SolrCloudConnect-all.jar
   id 'com.github.johnrengelman.shadow' version '1.2.3'
+  
 }
 
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'application'
-
+apply plugin: 'maven-publish'
 
 
 mainClassName = 'org.search.solr.SolrRun'
@@ -32,6 +35,27 @@ repositories {
     mavenLocal();
     mavenCentral();
 }
+
+group = 'org.search.solr'
+version = '1.2.5'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+publishing {
+    repositories {
+        maven {
+            url "$buildDir/repo"
+            // then copy into local repository
+            // mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/repo/org/search/solr/SolrCloudConnect/1.2.5/SolrCloudConnect-1.2.5.jar -DgroupId=org.search.solr -DartifactId=SolrCloudConnect -Dversion=1.2.5 -Dpackaging=jar
+        }
+    }
+}
+
 
 ext {
     solrJVersion="5.4.0"

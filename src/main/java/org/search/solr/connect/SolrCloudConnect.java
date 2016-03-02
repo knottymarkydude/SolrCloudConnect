@@ -64,7 +64,7 @@ public class SolrCloudConnect implements SolrConnect {
         solr.connect();
 
     }
-
+    
     /**
      *
      * Returns a status of sending a ping request to the server.

@@ -1,0 +1,12 @@
+Run gradle publish 
+to create a repo for Maven repository
+then
+
+mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/repo/org/search/solr/SolrCloudConnect/1.2.5/SolrCloudConnect-1.2.5.jar -DgroupId=org.search.solr -DartifactId=SolrCloudConnect -Dversion=1.2.5 -Dpackaging=jar
+
+For the big jar file
+
+Run gradle shadowJar
+then
+
+mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/libs/SolrCloudConnect-all.jar -DgroupId=org.search.solr -DartifactId=SolrCloudConnectAll -Dversion=1.2.5 -Dpackaging=jar

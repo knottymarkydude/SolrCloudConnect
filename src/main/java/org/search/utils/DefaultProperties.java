@@ -39,7 +39,7 @@ public class DefaultProperties {
             try {
                 prop.load(inputStream);
             } catch (IOException ex) {
-                Logger.getLogger(SolrProperties.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(DefaultProperties.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
