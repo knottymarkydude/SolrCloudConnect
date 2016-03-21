@@ -11,7 +11,6 @@ apply plugin: 'maven'
 apply plugin: 'application'
 apply plugin: 'maven-publish'
 
-
 mainClassName = 'org.search.solr.SolrRun'
 
 sourceCompatibility = '1.8'
@@ -51,7 +50,8 @@ publishing {
         maven {
             url "$buildDir/repo"
             // then copy into local repository
-            // mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/repo/org/search/solr/SolrCloudConnect/1.2.5/SolrCloudConnect-1.2.5.jar -DgroupId=org.search.solr -DartifactId=SolrCloudConnect -Dversion=1.2.5 -Dpackaging=jar
+            //mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/libs/solr-cloud-connect-1.2.5.jar -DgroupId=org.search.solr -DartifactId=solr-cloud-connect -Dversion=1.2.5 -Dpackaging=jar
+            //mvn install:install-file -Dfile=/Users/mw8/NetBeansProjects/Sanger/SolrCloudConnect/build/libs/SolrCloudConnect-1.2.5-all.jar -DgroupId=org.search.solr -DartifactId=solr-cloud-connect-all -Dversion=1.2.5 -Dpackaging=jar
         }
     }
 }
@@ -77,5 +77,5 @@ dependencies {
 }
 
 task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
-    gradleVersion = '2.5'
+    gradleVersion = '2.9'
 }
