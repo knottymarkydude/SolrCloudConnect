@@ -13,12 +13,13 @@ import java.util.logging.Logger;
  *
  * @author mw8
  */
+
 public class DefaultProperties {
 
     private final String propFileName;
     
     public DefaultProperties(String propFileName) {
-        this.propFileName = propFileName;
+        this.propFileName = propFileName + ".properties";
     }
     
     /**
